@@ -84,7 +84,7 @@ if __name__ == "__main__":
 	dataTrain, dataTest, labelsTrain, labelsTest, wordIdMap, maxLength = buildDataFull()
 
 
-	embeddingMatrix = np.zeros((len(wordIdMap) + 1, embeddingDim))
+	embeddingMatrix = np.zeros((len(wordIdMap)+1, embeddingDim))
 	for word, i in wordIdMap.items():
 		try:
 			vector = wvModel.wv[word]
@@ -102,7 +102,11 @@ if __name__ == "__main__":
 	# 							trainable=False)
 
 	sequenceInput = Input(shape=(maxLength, ), dtype='int32')
-	embedding = Embedding(input_dim = len(wordIdMap), output_dim = embeddingDim, input_length = maxLength)(sequenceInput)
+	embedding = Embedding(input_dim = len(wordIdMap) + 1, 
+						output_dim = embeddingDim, 
+						weights = [embeddingMatrix],
+						input_length = maxLength,
+						trainable = False)(sequenceInput)
 	# embeddedSequences = embeddingLayer(sequenceInput)
 	finalEmbeddedSeq = Reshape((maxLength, embeddingDim, 1))(embedding)
 
