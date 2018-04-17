@@ -9,6 +9,7 @@ from keras.utils import to_categorical
 from gensim.models import Word2Vec
 from collections import Counter
 from wv import loadData, processStr
+import json
 
 def obtainData(typeOfData = "train"):
 	fileName = "20_train" if typeOfData == "train" else "20_test"
@@ -44,8 +45,10 @@ def buildDataFull():
 	emojiCounts = Counter(emojis)
 	print "number of emojis detected is: " + str(len(emojiCounts))
 	emojiIdMap = {}
+	idEmojiMap = {}
 	for index, emoji in enumerate(emojiCounts):
 		emojiIdMap[emoji] = index
+		idEmojiMap[index] = emoji
 	emojiLabels = [emojiIdMap[ele] for ele in emojis]
 	texts = [' '.join(ele) for ele in sentences]
 	tokenizer = Tokenizer()
@@ -65,24 +68,71 @@ def buildDataFull():
 	trainY = labels[:trainLength]
 	testY = labels[-testLength:]
 
-	return trainX, testX, trainY, testY, wordIdMap, maxLength
+	return trainX, testX, trainY, testY, wordIdMap, maxLength, idEmojiMap
+
+def getEmojiNVocab():
+	packedData = json.load(open('data.json'))
+	idEmojiMap = packedData["emo"]
+	wordIdMap = packedData["dic"]
+	maxLength = packedData["len"]
+
+	emojiTokenMap = {}
+	emojiTokenMap["eoji2764"] = ":heart:"
+	emojiTokenMap["eoji2744"] = ":snowflake:"
+	emojiTokenMap["eoji1f4aa"] = ":muscle:"
+	emojiTokenMap["eoji1f60d"] = ":heart_eyes:"
+	emojiTokenMap["eoji2728"] = ":sparkles:"
+	emojiTokenMap["eoji1f62d"] = ":sob:"
+	emojiTokenMap["eoji1f618"] = ":kissing_heart:"
+	emojiTokenMap["eoji1f60e"] = ":sunglasses:"
+	emojiTokenMap["eoji1f44c"] = ":ok_hand:"
+	emojiTokenMap["eoji1f602"] = ":joy:"
+	emojiTokenMap["eoji1f525"] = ":fire:"
+	emojiTokenMap["eoji1f64f"] = ":pray:"
+	emojiTokenMap["eoji1f499"] = ":blue_heart:"
+	emojiTokenMap["eoji1f4af"] = ":100:"
+	emojiTokenMap["eoji1f495"] = ":two_hearts:"
+	emojiTokenMap["eoji1f60a"] = ":blush:"
+	emojiTokenMap["eoji1f64c"] = ":raised_hands:"
+	emojiTokenMap["eoji1f389"] = ":tada:"
+	emojiTokenMap["eoji1f48b"] = ":kiss:"
+	emojiTokenMap["eoji1f384"] = ":christmas_tree:"
+
+	return idEmojiMap, wordIdMap, maxLength, emojiTokenMap
+
+def getXData(maxLength, wordIdMap, inputText):
+
+	# packedData = json.load(open('data.json'))
+	# maxLength = int(packedData["len"])
+	# wordIdMap = packedData["dic"]
+	# idEmojiMap = packedData["emo"]
+
+	seq = [wordIdMap[ele] for ele in inputText if ele in wordIdMap]
+	seq = [seq]
+	# seq = tk.texts_to_sequences(inputText)
+	data = pad_sequences(seq, maxlen = maxLength, padding='post', truncating='post')
+	return data
 
 if __name__ == "__main__":
 	filterSizes = [3, 4, 5]
-	numOfFilters = 10
+	numOfFilters = 3    # tested with 10, 20
 	dropout = 0.5
 	batchSize = 50
-	epochs = 20
+	epochs = 3
 	sequenceLength = 20 # Twitter max length is 140 chars
-	embeddingDim = 50
+	embeddingDim = 100
 	numOfLabels = 20
-	drop = 0
+	drop = 0.5
 	wvModel = Word2Vec.load('vectors.bin')
 	# sentencesTrain, emojisTrain = obtainData()
 	# dataTrain, labelsTrain, wordIdTrain = obtainData()
 	# dataTest, labelsTest, wordIdTest = obtainData("test")
-	dataTrain, dataTest, labelsTrain, labelsTest, wordIdMap, maxLength = buildDataFull()
-
+	dataTrain, dataTest, labelsTrain, labelsTest, wordIdMap, maxLength, idEmojiMap = buildDataFull()
+	packedData = {"len": maxLength, "dic": wordIdMap, "emo": idEmojiMap}
+	js = json.dumps(packedData)
+	fp = open("data.json", "w")
+	fp.write(js)
+	fp.close()
 
 	embeddingMatrix = np.zeros((len(wordIdMap)+1, embeddingDim))
 	for word, i in wordIdMap.items():
@@ -133,6 +183,6 @@ if __name__ == "__main__":
 	model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['acc'])
 	print("Traning Model...")
 	model.fit(dataTrain, labelsTrain, batch_size=batchSize, epochs=epochs, verbose=1, validation_data=(dataTest, labelsTest))
-
+	model.save('emo.h5')
 
 	pass
