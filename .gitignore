@@ -2,8 +2,8 @@
 20_validation
 20_test
 *.h5
-*.png
-*.PNG
+# *.png
+# *.PNG
 *.jpg
 *.json
 
