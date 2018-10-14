@@ -11,6 +11,22 @@ The model was built based on Keras (with Tensorflow backend; you may also use Py
 
 For now we only include the CNN model, word vector trainer, and the Jupyter Notebook for live demo. You may refer to cnn.py for more details on the construction of CNN model. The details of the neural networks (CNN and LSTM) can be found inside the Jupyter Notebook.
 
+### cnn.py, cnnl.py, lstm.py, lstml.py
+
+The 4 files contain the training model built based on CNN and LSTM. The "l" appended to the end of cnn and lstm represents the length of the data used for training; "l" means 20_train + 5_train (most frequently used 20 emojis, most frequently used 5 emojis) in total for training, while without "l" it means we are only using 20_train.
+
+### steps.ipynb
+
+The Jupyter Notebook for live demo, as well as explanations for the model. The parameters for CNN and LSTM are specified in the Notebook, so you may refer to the details inside. Additionally, we provide an input box and button for the user to try out the effect of our real-time prediction model: they can input any text, and check out the predicted emoji. Note: to run the live demo you may need the trained model (.h5 files, which are ignored in this repo. You can run the .py file to get them).
+
+### wv.py
+
+The Word2Vec model used to obtain the embeddings based on the text input. Built on top of standard Gensim Word2Vec model. 
+
+### vectors.bin, vectors300.bin
+
+The embedding output files. Specifically, vectors.bin contains embeddings with the dimension of 50, while vectors300.bin gives dim 300. In the implementation we are using the vectors.bin file.
+
 <!-- ### Break down into end to end tests
 
 Explain what these tests test and why
