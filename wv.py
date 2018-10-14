@@ -14,7 +14,7 @@ def loadData(fileName = "20_train"):
 	return sentences, emojis
 
 def processStr(inputStr):
-	result = inputStr.replace("@user", "").translate(None, string.punctuation).translate(None, string.digits)
+	result = inputStr.replace("@user", "").translate(None, string.punctuation).translate(None, string.digits).lower()
 	return result
 
 if __name__ == "__main__":

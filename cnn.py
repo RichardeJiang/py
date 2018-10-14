@@ -115,12 +115,12 @@ def getXData(maxLength, wordIdMap, inputText):
 
 if __name__ == "__main__":
 	filterSizes = [3, 4, 5]
-	numOfFilters = 3    # tested with 10, 20
+	numOfFilters = 5   # tested with 10, 20
 	dropout = 0.5
 	batchSize = 50
-	epochs = 3
+	epochs = 5
 	sequenceLength = 20 # Twitter max length is 140 chars
-	embeddingDim = 100
+	embeddingDim = 50
 	numOfLabels = 20
 	drop = 0.5
 	wvModel = Word2Vec.load('vectors.bin')
