@@ -29,6 +29,7 @@ def obtainData(typeOfData = "train"):
 
 def buildDataFull():
 	fileNames = ["20_train", "20_validation", "20_test"]
+	fileNames = ["5_train", "5_test"]
 	sentences = []
 	emojis = []
 	trainLength  = 0
@@ -113,15 +114,23 @@ def getXData(maxLength, wordIdMap, inputText):
 	data = pad_sequences(seq, maxlen = maxLength, padding='post', truncating='post')
 	return data
 
+def makePrediction(inputStr, maxLength, wordIdMap, model):
+	processedStr = processStr(inputStr)
+	data = getXData(maxLength, wordIdMap, processedStr)
+	predicted = model.predict(data)[0]
+	predictedY = predicted.argmax(axis=-1)
+
+	return predictedY
+
 if __name__ == "__main__":
 	filterSizes = [3, 4, 5]
-	numOfFilters = 5   # tested with 10, 20
+	numOfFilters = 100    # tested with 10, 20
 	dropout = 0.5
-	batchSize = 50
-	epochs = 5
+	batchSize = 1000
+	epochs = 20
 	sequenceLength = 20 # Twitter max length is 140 chars
 	embeddingDim = 50
-	numOfLabels = 20
+	numOfLabels = 5
 	drop = 0.5
 	wvModel = Word2Vec.load('vectors.bin')
 	# sentencesTrain, emojisTrain = obtainData()
@@ -130,7 +139,7 @@ if __name__ == "__main__":
 	dataTrain, dataTest, labelsTrain, labelsTest, wordIdMap, maxLength, idEmojiMap = buildDataFull()
 	packedData = {"len": maxLength, "dic": wordIdMap, "emo": idEmojiMap}
 	js = json.dumps(packedData)
-	fp = open("data.json", "w")
+	fp = open("datacnn.json", "w")
 	fp.write(js)
 	fp.close()
 
@@ -183,6 +192,11 @@ if __name__ == "__main__":
 	model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['acc'])
 	print("Traning Model...")
 	model.fit(dataTrain, labelsTrain, batch_size=batchSize, epochs=epochs, verbose=1, validation_data=(dataTest, labelsTest))
-	model.save('emo.h5')
+	model.save('emocnn.h5')
+
+	# testStr = "we need to do this right now!"
+	# y = makePrediction(testStr, maxLength, wordIdMap, model)
+
+	# print y
 
 	pass
